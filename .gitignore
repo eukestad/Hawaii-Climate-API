@@ -1,3 +1,9 @@
+# User Mods
+Resources/
+sqlalchemy_grading_rubric.pdf
+Images/
+README_Ins.MD
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
