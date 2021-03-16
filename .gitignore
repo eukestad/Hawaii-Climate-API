@@ -3,6 +3,7 @@ Resources/
 sqlalchemy_grading_rubric.pdf
 Images/
 README_Ins.MD
+ClimateAnalysis.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
