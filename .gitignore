@@ -1,9 +1,12 @@
 # User Mods
 Resources/
 sqlalchemy_grading_rubric.pdf
-Images/
+# Images/
 README_Ins.MD
 ClimateAnalysis.py
+workspace.code-workspace
+temp_analysis_bonus_1_starter.ipynb
+temp_analysis_bonus_2_starter.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
