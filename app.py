@@ -31,21 +31,22 @@ app = Flask(__name__)
 
 # home route
 @app.route("/")
+@app.route("/api/v1.0/")
 def welcome():
     # List Routes
     return (
         f"<h3>Welcome to the Hawaii Climate API</h3><br/><strong>Available Routes:</strong><br/>"
         f'<ul>'
-        f'<li><strong>Precipitation:</strong> <a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a></li><br/>'
-        f'<li><strong>Stations:</strong> <a href="/api/v1.0/stations">/api/v1.0/stations</a></li><br/>'
-        f'<li><strong>Temperature Observations:</strong> <a href="/api/v1.0/tobs">/api/v1.0/tobs</a></li><br/>'
+        f'<li><strong>Precipitation Data:</strong> <a href="/api/v1.0/precipitation">/api/v1.0/precipitation</a></li><br/>'
+        f'<li><strong>Station List:</strong> <a href="/api/v1.0/stations">/api/v1.0/stations</a></li><br/>'
+        f'<li><strong>Temperature Observations for Most Active Station:</strong> <a href="/api/v1.0/tobs">/api/v1.0/tobs</a></li><br/>'
         f'<li><strong>Temperature Summary by Start and End Dates:</strong></li><br/>'
         f'<ul>'
         f'<li>Start Only (/api/v1.0/start): <a href="/api/v1.0/2016-08-23">/api/v1.0/2016-08-23</a></li><br/>'
         f'<li>Start and End (/api/v1.0/start/end): <a href="/api/v1.0/2016-08-23/2017-08-23">/api/v1.0/2016-08-23/2017-08-23</a></li><br/>'
         f'</ul>'
         f'</ul>'
-        f'<br/><i>Data is available from 01/01/2010 to 8/23/2017</i><br/>'
+        f'<br/><i>Data is available from 01/01/2010 to 08/23/2017</i><br/>'
     )
 
 # precipitation route
@@ -73,13 +74,13 @@ def precipitation():
     last12mnth_prcp = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date>=filterdate).all()
     session.close()
 
-    """Convert the query results to a dictionary using date as the key and prcp as the value."""
+    # Convert the query results to a dictionary using date as the key and prcp as the value.
     prcp_dates = {}
 
     for date, prcp in last12mnth_prcp:
         prcp_dates[date] = prcp
 
-    """Return the JSON representation of your dictionary."""
+    # Return the JSON representation of your dictionary.
     return jsonify(prcp_dates)
 
 # station route
@@ -97,7 +98,7 @@ def stations():
 
     return jsonify(stations)
 
-# temp route
+# most active station route
 @app.route("/api/v1.0/tobs")
 def tobs(): 
     # Create our session (link) from Python to the DB
@@ -122,18 +123,23 @@ def tobs():
 
     active_stations_df = pd.DataFrame(active_stations, columns=['station','observations']).sort_values(by='observations', ascending=False)
 
+    #get the most active station
     mostactive = active_stations_df.head(1).iloc[0]['station']
+
     # Query the dates and temperature observations of the most active station
     last12mnth_temp = session.query(Measurement.date, Measurement.tobs).filter(Measurement.date>=filterdate).filter(Measurement.station==mostactive).all()
     session.close()
 
+    stationdict={'station':mostactive}
     # Return a JSON list of temperature observations (TOBS) for the previous year.
-    return jsonify(last12mnth_temp)
+    return jsonify(stationdict,last12mnth_temp)
 
 # dynamic date range routes
 @app.route("/api/v1.0/<start_date>", defaults={'end_date':None})
 @app.route("/api/v1.0/<start_date>/<end_date>")
 def datefilter(start_date, end_date):
+    datedict = {'from':start_date,
+                'to':end_date}
     # Create our session (link) from Python to the DB
     session = Session(engine)    
     # When given the start only, calculate TMIN, TAVG, and TMAX for all dates greater than and equal to the start date.
@@ -145,10 +151,12 @@ def datefilter(start_date, end_date):
         results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
                         filter(Measurement.date >= start_date).filter(Measurement.date <= end_date).all()
         
-    # calc_temps = pd.DataFrame(results, columns=['TMIN','TAVG','TMAX'])
+    calc_temps = pd.DataFrame(results, columns=['TMIN','TAVG','TMAX']).to_dict()
+
+    session.close()
 
     # Return a JSON list of the minimum temperature, the average temperature, and the max temperature for a given start or start-end range.
-    return jsonify(results)
+    return jsonify([datedict, calc_temps])
 
 # run app
 if __name__ == '__main__':
