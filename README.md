@@ -13,7 +13,7 @@ The repo features a flask app that allows users to navigate the data through the
 
   * Home page.
 
-  ![Home page image](images/flaskapp.png)
+  ![Home page image](Images/flaskapp.png)
 
 * `/api/v1.0/precipitation`
 
@@ -40,11 +40,11 @@ The Climate Analysis Jupyter Notebook:
 
 * reviews the precipitation recorded by weather stations in the past year
 
-    ![Precipitation](images/precipitation_plot.png)
+    ![Precipitation](Images/precipitation_plot.png)
 
 * finds the most active station and reviews temperature observations for the past year
 
-    ![Temp Obs](images/temperature_hist.png)
+    ![Temp Obs](Images/temperature_hist.png)
 
 ## Status
 _finished_
