@@ -138,6 +138,12 @@ def tobs():
 @app.route("/api/v1.0/<start_date>", defaults={'end_date':None})
 @app.route("/api/v1.0/<start_date>/<end_date>")
 def datefilter(start_date, end_date):
+    # check date format
+    try:
+        dt.datetime.strptime(start_date, '%Y-%m-%d')
+    except ValueError:
+        return 'Enter date in yyyy-mm-dd format.'
+
     datedict = {'from':start_date,
                 'to':end_date}
     # Create our session (link) from Python to the DB
